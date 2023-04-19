@@ -92,7 +92,7 @@ int main(int ac, char **ag) {
 					cerr << "Error: accept() failed" << endl;
 				}
 				event.data.fd = client_fd;
-				event.events = EPOLLIN |　EPOLLRDHUP;
+				event.events = EPOLLIN | EPOLLRDHUP;
 				if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &event) < 0) {
 					cerr << "Error: epoll_ctl() failed" << endl;
 				}
