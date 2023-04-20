@@ -16,15 +16,9 @@ private:
 public:
   Listen(const std::vector<in_port_t> &ports); // コンストラクタ
   ~Listen(){};                                 // デストラクタ
-  bool operator==(const int fd) const {
-    for (int i = 0; i < this->port_num_; i++) {
-      if (this->fds_[i] == fd) {
-        return true;
-      }
-    }
-    return false;
-  } // 比較演算子
-    // 新たな接続要求がクライアントからあったかどうかを判定するために使用
+  bool operator==(const int fd) const;
+  // 比較演算子
+  // 新たな接続要求がクライアントからあったかどうかを判定するために使用
 };
 
 #endif
