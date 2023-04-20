@@ -15,6 +15,7 @@ webserverの設定を扱うクラス
 */
 
 #ifndef CONF_HPP
+#define CONF_HPP
 #include <iostream>
 
 class conf {
