@@ -30,6 +30,15 @@ Listen::Listen(const std::vector<in_port_t> &ports)
   }
 }
 
+bool Listen::operator==(const int fd) const {
+  for (int i = 0; i < this->port_num_; i++) {
+    if (this->fds_[i] == fd) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /* テストmain */
 // int main() {
 //   std::vector<in_port_t> ports;
