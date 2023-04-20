@@ -31,10 +31,10 @@ Listen::Listen(const std::vector<in_port_t> &ports)
 }
 
 /* テストmain */
-int main() {
-  std::vector<in_port_t> ports;
-  ports.push_back(htons(80));
-  ports.push_back(htons(8080));
-  Listen listen(ports);
-  return 0;
-}
+// int main() {
+//   std::vector<in_port_t> ports;
+//   ports.push_back(htons(80));
+//   ports.push_back(htons(8080));
+//   Listen listen(ports);
+//   return 0;
+// }
