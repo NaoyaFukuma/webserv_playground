@@ -1,21 +1,22 @@
-#ifndef LISTEN_HPP
-#define LISTEN_HPP
+#ifndef LISTENS_HPP
+#define LISTENS_HPP
 
 #include "../conf/conf.hpp"
 #include <string>
 #include <vector>
 
 /* webserverにおける、リッスンソケットを扱うクラス */
-class Listen {
+class Listens {
 private:
   int port_num_;         // ポートの数
   std::vector<int> fds_; // リッスンソケットのファイルディスクリプタ
-  Listen(const Listen &other); // コピーコンストラクタは不使用(シングルトン)
-  void operator=(const Listen &other); // コピー代入演算子も不使用(シングルトン)
-  Listen(); // デフォルトコンストラクタは不使用
+  Listens(const Listens &other); // コピーコンストラクタは不使用(シングルトン)
+  void
+  operator=(const Listens &other); // コピー代入演算子も不使用(シングルトン)
+  Listens(); // デフォルトコンストラクタは不使用
 public:
-  Listen(const std::vector<in_port_t> &ports); // コンストラクタ
-  ~Listen(){};                                 // デストラクタ
+  Listens(const std::vector<Conf> &conf); // コンストラクタ
+  ~Listens(){};                           // デストラクタ
   bool operator==(const int fd) const;
   // 比較演算子
   // 新たな接続要求がクライアントからあったかどうかを判定するために使用
