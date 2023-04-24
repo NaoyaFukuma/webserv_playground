@@ -1,4 +1,4 @@
-#include "listen.hpp"
+#include "listens.hpp"
 #include "../conf/conf.hpp"
 #include <netinet/in.h>
 #include <stdexcept>
@@ -9,7 +9,7 @@
 #include <vector>
 
 // コンストラクタ
-Listen::Listen(const std::vector<in_port_t> &ports)
+Listens::Listens(const std::vector<in_port_t> &ports)
     : port_num_(ports.size()), fds_(port_num_) {
   for (int i = 0; i < port_num_; i++) {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -24,13 +24,13 @@ Listen::Listen(const std::vector<in_port_t> &ports)
       throw std::runtime_error("bind() failed");
     }
     if (listen(fd, SOMAXCONN) == -1) {
-      throw std::runtime_error("listen() failed");
+      throw std::runtime_error("listens() failed");
     }
     fds_[i] = fd;
   }
 }
 
-bool Listen::operator==(const int fd) const {
+bool Listens::operator==(const int fd) const {
   for (int i = 0; i < this->port_num_; i++) {
     if (this->fds_[i] == fd) {
       return true;
@@ -44,6 +44,6 @@ bool Listen::operator==(const int fd) const {
 //   std::vector<in_port_t> ports;
 //   ports.push_back(htons(80));
 //   ports.push_back(htons(8080));
-//   Listen listen(ports);
+//   Listens listens(ports);
 //   return 0;
 // }
