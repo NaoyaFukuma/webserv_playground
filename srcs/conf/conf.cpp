@@ -1,4 +1,5 @@
 #include "conf.hpp"
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -7,6 +8,7 @@
 // .confファイルが指定された場合に使用し、設定ファイルを読み込む
 Conf::Conf(const char *conf_path) {
   // open
+  timeout_ = 60; // default
   std::ifstream ifs(conf_path);
   if (!ifs) {
     std::cerr << "conf file not found" << std::endl;
@@ -71,6 +73,7 @@ void Conf::parse_sever(std::ifstream &ifs, Server &server) {
     if (line.find("listen ") != std::string::npos) {
       size_t pos = line.find("listen ");
       std::string addr = line.substr(pos + 7);
+      server.listen_.sin_family = AF_INET;
       if (addr.find(":") != std::string::npos) {
         server.listen_.sin_addr.s_addr =
             htons(inet_addr(addr.substr(0, addr.find(":"))));
@@ -158,20 +161,20 @@ void Conf::parse_location(std::ifstream &ifs, Location &location) {
     } else if (line.find("client_max_body_size ") != std::string::npos) {
       std::string size_str =
           line.substr(line.find("client_max_body_size ") + 21);
-      size_str.pop_back();
+      size_str.erase(size_str.end() - 1);
       size_t multiplier = 1;
       size_t value = 0;
 
-      char unit = size_str.back();
+      char unit = size_str[size_str.size() - 1];
       if (unit == 'k' || unit == 'K') {
         multiplier = 1024;
-        size_str.pop_back();
+        size_str.erase(size_str.end() - 1);
       } else if (unit == 'm' || unit == 'M') {
         multiplier = 1024 * 1024;
-        size_str.pop_back();
+        size_str.erase(size_str.end() - 1);
       } else if (unit == 'g' || unit == 'G') {
         multiplier = 1024 * 1024 * 1024;
-        size_str.pop_back();
+        size_str.erase(size_str.end() - 1);
       }
 
       try {
@@ -185,12 +188,19 @@ void Conf::parse_location(std::ifstream &ifs, Location &location) {
 
     } else if (line.find("root ") != std::string::npos) {
       location.root_ = line.substr(line.find("root ") + 5);
-      location.root_.pop_back();
+      location.root_.erase(location.root_.end() - 1);
 
     } else if (line.find("index ") != std::string::npos) {
-      location.index_ = line.substr(line.find("index ") + 6);
-      location.index_.pop_back();
-
+      std::string tmp = line.substr(line.find("index ") + 6);
+      while (tmp.length()) {
+        if (tmp.find(" ") != std::string::npos) {
+          location.index_.push_back(tmp.substr(0, tmp.find(" ")));
+          tmp = tmp.substr(tmp.find(" ") + 1);
+        } else {
+          location.index_.push_back(tmp.substr(0, tmp.find(";")));
+          tmp = tmp.substr(tmp.find(";") + 1);
+        }
+      }
     } else if (line.find("is_cgi ") != std::string::npos) {
       if (line.find("on") != std::string::npos) {
         location.is_cgi_ = true;
@@ -203,14 +213,14 @@ void Conf::parse_location(std::ifstream &ifs, Location &location) {
 
     } else if (line.find("cgi_executor ") != std::string::npos) {
       location.cgi_executor_ = line.substr(line.find("cgi_executor ") + 13);
-      location.cgi_executor_.pop_back();
+      location.cgi_executor_.erase(location.cgi_executor_.end() - 1);
 
     } else if (line.find("error_page ") != std::string::npos) {
       std::string error_code =
           line.substr(line.find("error_page ") + 11,
                       line.rfind(" ") - (line.find("error_page ") + 11));
       std::string error_page = line.substr(line.rfind(" ") + 1);
-      error_page.pop_back();
+      error_page.erase(error_page.end() - 1);
       while (error_code.length()) {
         if (error_code.find(' ') != std::string::npos) {
           std::string tmp = error_code.substr(0, error_code.find(' '));
@@ -233,7 +243,7 @@ void Conf::parse_location(std::ifstream &ifs, Location &location) {
 
     } else if (line.find("return ") != std::string::npos) {
       location.return_ = line.substr(line.find("return ") + 7);
-      location.return_.pop_back();
+      location.return_.erase(location.return_.end() - 1);
 
     } else if (line.find("}") != std::string::npos) {
       break;
@@ -271,7 +281,7 @@ void Conf::print_conf() {
                 << std::endl;
       std::cout << "    root: " << this->server_vec_[i].locations_[j].root_
                 << std::endl;
-      std::cout << "    index: " << this->server_vec_[i].locations_[j].index_
+      std::cout << "    index: " << this->server_vec_[i].locations_[j].index_[0]
                 << std::endl;
       std::cout << "    is_cgi: "
                 << (this->server_vec_[i].locations_[j].is_cgi_ ? "true"
@@ -298,10 +308,10 @@ void Conf::print_conf() {
   }
 }
 
-int main(int ac, char **ag) {
-  Conf conf(ag[1]);
-  conf.print_conf();
-}
+// int main(int ac, char **ag) {
+//   Conf conf(ag[1]);
+//   conf.print_conf();
+// }
 
 // デストラクタ
 Conf::~Conf() {}
